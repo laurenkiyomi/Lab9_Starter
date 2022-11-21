@@ -6,6 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lab 9</title>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
 
   <style>
     button {
@@ -69,25 +70,42 @@
     </form>
 
     <section id="error-btns">
-      <button>Console Log</button>
-      <button>Console Error</button>
-      <button>Console Count</button>
-      <button>Console Warn</button>
-      <button>Console Assert</button>
-      <button>Console Clear</button>
-      <button>Console Dir</button>
-      <button>Console dirxml</button>
-      <button>Console Group Start</button>
-      <button>Console Group End</button>
-      <button>Console Table</button>
-      <button>Start Timer</button>
-      <button>End Timer</button>
-      <button>Console Trace</button>
-      <button>Trigger a Global Error</button>
+      <button id="log">Console Log</button>
+      <button id="error">Console Error</button>
+      <button id="count">Console Count</button>
+      <button id="warn">Console Warn</button>
+      <button id="assert">Console Assert</button>
+      <button id="clear">Console Clear</button>
+      <button id="dir">Console Dir</button>
+      <button id="dirxml">Console dirxml</button>
+      <button id="group-start">Console Group Start</button>
+      <button id="group-end">Console Group End</button>
+      <button id="table">Console Table</button>
+      <button id="start-timer">Start Timer</button>
+      <button id="end-timer">End Timer</button>
+      <button id="trace">Console Trace</button>
+      <button id="global-error">Trigger a Global Error</button>
     </section>
   </main>
 
   <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "1d695e895f864339910db450e38a0be0"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+
+    window.onerror = (msg, url, lineNo, columnNo, error) => {
+      alert('Sadly an error happened my friend');
+      TrackJS.track();
+    }
+
+    class ValidationError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "ValidationError";
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,13 +113,139 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+      try {
+        if (!(/^\d+$/.test(firstNum))) {
+          throw new ValidationError("First number is not a valid number")
+        }
+
+        if (!(/^\d+$/.test(secondNum))) {
+          throw new ValidationError("Second number is not a valid number")
+        }
+
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      } catch (err) {
+        if (err instanceof ValidationError) {
+          alert("Make sure input is only numbers");
+        }
+        console.error(err);
+        TrackJS.track();
+      } 
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
     // You may move this JS to another file if you wish
+    let button = document.querySelector('#log');
+    button.addEventListener('click', () => {
+      console.log("Console Log Demo");
+    })
+
+    button = document.querySelector('#error');
+    button.addEventListener('click', () => {
+      console.error("Console Log Error");
+    })
+
+    button = document.querySelector('#count');
+    button.addEventListener('click', () => {
+      console.count(["Count Button"]);
+    })
+
+    button = document.querySelector('#warn');
+    button.addEventListener('click', () => {
+      console.warn('Warn Button');
+    })
+
+    button = document.querySelector('#assert');
+    button.addEventListener('click', () => {
+      const number = 2;
+      const reason = 'The number does not equal 5';
+      console.assert(number == 3, {number, reason});
+    })
+
+    button = document.querySelector('#clear');
+    button.addEventListener('click', () => {
+      console.clear();
+    })
+
+    button = document.querySelector('#dir');
+    button.addEventListener('click', () => {
+      console.dir(document.querySelector('#dir'));
+    })
+
+    button = document.querySelector('#dirxml');
+    button.addEventListener('click', () => {
+      console.dirxml(document.querySelector('#dirxml'));
+    })
+
+    button = document.querySelector('#group-start');
+    button.addEventListener('click', () => {
+      console.group();
+    })
+
+    button = document.querySelector('#group-end');
+    button.addEventListener('click', () => {
+      console.groupEnd();
+    })
+
+    button = document.querySelector('#table');
+    button.addEventListener('click', () => {
+      var classes = [
+        {
+          Department: 'CSE',
+          Number: '110',
+          Name: 'Software Engineering'
+        },
+        {
+          Department: 'MATH',
+          Number: '140A',
+          Name: 'Real Analysis'
+        },
+        {
+          Department: 'CAT',
+          Number: '125R',
+          Name: 'Writing and Rhetoric'
+        },
+      ];
+      console.table(classes);
+    })
+
+    button = document.querySelector('#start-timer');
+    button.addEventListener('click', () => {
+      console.time(['Time Button']);
+    })
+
+    button = document.querySelector('#end-timer');
+    button.addEventListener('click', () => {
+      console.timeEnd(['Time Button']);
+    })
+
+    button = document.querySelector('#trace');
+    button.addEventListener('click', () => {
+      const handleBtnClick = () => { uno(); };
+      const uno = () => { dos(); };
+      const dos = () => { tres(); };
+      const tres = () => { console.trace(); };
+      handleBtnClick();
+    })
+
+    button = document.querySelector('#global-error');
+    button.addEventListener('click', () => {
+      try {
+        let message = null;
+        if (!message) {
+          throw new ReferenceError("Trying to print undefined Data!!!");
+        }
+
+        console.log(message)
+      } catch (err) {
+        console.error(err);
+        TrackJS.track();
+      } finally {
+        console.log( 'Finally the end of the try catch block always executes.' );
+      }
+    })
   </script>
 </body>
 
