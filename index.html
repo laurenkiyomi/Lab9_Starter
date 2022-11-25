@@ -88,17 +88,14 @@
     </section>
   </main>
 
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
     window.TrackJS && TrackJS.install({ 
       token: "1d695e895f864339910db450e38a0be0"
       // for more configuration options, see https://docs.trackjs.com
     });
-
-    window.onerror = (msg, url, lineNo, columnNo, error) => {
-      alert('Sadly an error happened my friend');
-      TrackJS.track();
-    }
-
+  </script>
+  <script>
     class ValidationError extends Error {
       constructor(message) {
         super(message);
@@ -126,11 +123,13 @@
         output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
       } catch (err) {
         if (err instanceof ValidationError) {
-          alert("Make sure input is only numbers");
+          console.log("Make sure input is only numbers");
         }
         console.error(err);
-        TrackJS.track();
-      } 
+      } finally {
+        document.querySelector('#first-num').value = '';
+        document.querySelector('#second-num').value = '';
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
@@ -232,19 +231,10 @@
 
     button = document.querySelector('#global-error');
     button.addEventListener('click', () => {
-      try {
-        let message = null;
-        if (!message) {
-          throw new ReferenceError("Trying to print undefined Data!!!");
-        }
-
-        console.log(message)
-      } catch (err) {
-        console.error(err);
-        TrackJS.track();
-      } finally {
-        console.log( 'Finally the end of the try catch block always executes.' );
-      }
+      throw new Error("This is a global error.")
+    })
+    window.addEventListener('error', () => {
+      console.log('Sadly an error happened my friend');
     })
   </script>
 </body>
